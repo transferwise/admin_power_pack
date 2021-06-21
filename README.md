@@ -8,76 +8,6 @@ The Admin Power Pack is a tool for Looker administrators to accomplish certain m
 
 # Usage
 
-## Schedules++
-
-![schedules++ screenshot](images/schedules++.png)
-
-### Features
-
-The Schedules++ Page enables admins to execute operations in bulk and modify all schedules on a given Dashboard from a single point, without the need to sudo as users to modify their schedule plans.
-
-- The entire table is editable. Multiple rows can be edited at the same time. The “Revert” button will undo all local changes. **Details** contains metadata on the schedule plan, with links to System Activity and viewing the Dashboard with the schedule filters. Use the checkbox to the left to apply functions on specific rows:
-  - **Create/Update** - Update an existing scheduled plan with table data, or create a new scheduled plan if it does not already exist. Common uses would be to change schedule ownership, modify filter values, update recipients
-  - **Delete** - Delete the scheduled plan
-  - **Run Once** - Reruns the schedule using the [scheduled_plan_run_once](https://docs.looker.com/reference/api-and-integration/api-reference/v4.0/scheduled-plan#run_scheduled_plan_once) endpoint. This is useful for testing specific schedules or if multiple schedules need to be resent immediately
-  - **Disable** - Disable the schedule and prevent the schedule from sending until it’s re-enabled. The `Disable` and `Enable` functions modify the scheduled plan's enabled state. This is only accessible via Looker's API
-  - **Enable** - Enables the schedule. Re-enabling a schedule will send (maximum 1) schedule immediately, if, while it was disabled it should have run
-- **Generate Plans** - This will generate a new schedule plan for each row in the results of a Looker query. The use case would be to create distinct schedules for non-Looker users where User Attributes can not be applied.
-  - Filter values will be populated if the field label matches the filter name on the Dashboard. Ensure there is a field "Email" to populate recipient destinations
-- **Global Actions** - These actions will be applied across all schedules across the instance.
-  - **Find & Replace Emails** - Update email destinations from a CSV of email address mappings
-  - **Reassign Ownership** - Reassign ownership of all schedule plans from selected users to a new user
-  - **Resend Failed Schedules** - Validate and resend any schedules that have failed on their most recent attempt, within a specified timeframe
-  - **Select By Query** - Choose a bulk action to run (Enable, Disable, Delete, Run Once) on all schedule plans with a System Activity query ID
-
-### Limitations
-
-Only schedules sent to email destinations for User Defined Dashboards (UDDs) will load in the table. This extension **does not** currently support:
-
-- LookML Dashboards / Looks
-- Schedules sent to Webhooks / Actions / S3 / etc.
-- [Conditional Alerts](https://docs.looker.com/sharing-and-publishing/alerts)
-- [Embed themes](https://docs.looker.com/admin-options/settings/themes) are not supported
-
-## Users++
-
-![users++ screenshot](images/users++.png)
-
-The Users++ Page offers greater flexibility in filtering and bulk selecting user accounts, e.g. show users without email credentials or show users with duplicate names.
-
-Users can also be bulk selected based on a provided list of ids, email addresses, or a Looker query. Once users have been selected there are actions not available in the base UI, such as create email credentials and delete SSO credentials.
-
-The following functions are available via the _Actions_ bar:
-
-- **Select By:**
-  - **User ID or email address** - Select users by CSV of user IDs or email address
-  - **Query ID** - Select users with a System Activity query ID
-- **Bulk Mappings:**
-  - **Bulk create from mapping** - Bulk create new users with User Attributes from a CSV mapping
-  - **Bulk update from mapping** - Bulk update user email addresses according to a CSV mapping. This is very handy for companies that want to change email domains or SSO providers, and want to make sure that users keep their existing Looker account after the migration
-- **Functions:**
-  - **Users**
-    - **Enable / Disable users** - Enable or Disable selected users
-    - **Delete users** - Delete selected users
-    - **Logout users** - Terminate selected users sessions
-  - **User Attributes**
-    - **Set / Delete user attributes** - Set and Delete User Attributes for selected users at a user level
-  - **Groups**
-    - **Add / Remove users to groups** - Add and Remove selected users from groups
-  - **Roles**
-    - **Set roles** - Set roles (overwrite) for selected users at a user level
-  - **Manage Credentials**
-    - **Auto-fill from other creds** - Create email credentials for selected users from the email address already assigned from other credential types
-    - **Bulk send email creds** - Bulk send password reset emails to selected users. If the user has not yet set up their account, it will send a setup email to the user
-    - **Bulk create password reset** - Bulk create password reset URLs for selected users. If the user has not yet set up their account, a setup URL is generated
-    - **Delete Creds** - Delete one of the following credential types for the selected users: "Email", "Google", "LDAP", "OIDC", "SAML"
-
-The _Filters_ bar allows you to trim the displayed table of users to a specific subset of users, using the select menu, button group, and search bar. **(Note that all filters are additive)**
-
-- **Select Menu** - Quick filter menu used to only display users by type: _All Users_, _Regular Users_, _Embed Users_, _Looker Support_, or _Only Selected_. By default, the menu will display _Regular Users_ (excluding _Embed Users_ and _Looker Support_). _Only Selected_ will filter to users that have been selected
-- **Button Group** - Preset filter buttons to only display users that meet the criteria: _blank name_, _no email_, _no SSO_, _duplicate emails_, _duplicate names_, _disabled_, and _not disabled_
-- **Search Bar** - Search by user name, email, or id
-
 ## Common Workflows
 
 ### Bulk Creating New Users
@@ -120,43 +50,17 @@ However in order to avoid confusion, it is still recommended that only Looker ad
 - There is no need to create new model sets or roles for the APP, since Admins can always see all models.
 - Refer to the documentation on [Setting Permissions for Looker Extensions](https://docs.looker.com/data-modeling/extension-framework/permissions) for more details on extension permissions.
 
-## Option 1 - Marketplace Install (easiest)
-
-LookML Projects are backed by git repositories. This repo has been set up with all the other necessary LookML files in addition to the application javascript. You can install this extension via the Marketplace, however the project will be read-only so you will not be able to deploy any changes to the files.
-
-1. Create a New Database Connection
-   - This is needed purely as a stub for the new project configuration. The APP does not communicate with any of your databases. This new connection will merely be a stub that does not point to a real system
-   - Navigate to Admin => Connections. Select the "Add Connection" button
-   - You can pick any dialect and fill in bogus values for the required fields. We recommend selecting PostgreSQL, host= "localhost", database= "notreal", user= "notreal"
-   - Uncheck the "SQL Runner Precache" and then Add Connection. Don't bother testing the connection
-1. Install via Marketplace Git URL (further details [here](https://docs.looker.com/data-modeling/marketplace#installing_a_tool_from_a_git_url))
-   - Navigate to Marketplace => Manage
-   - Click the three-dot menu, and select "Install via Git URL". Enter the following:
-     - Git Repository URL: `git://github.com/davidtamaki/admin_power_pack`
-     - Git Commit SHA: `master`
-   - Accept the extension project permissions
-   - Select the connection name used in Step 1 and click Install
-1. Configure Model
-   - Once installed, go to the Manage LookML Projects page and select the "Configure" button for the `admin_power_pack` model
-   - You should see that the only allowed connection is the one selected in Step 2. Click Save
-   - After saving the configuration, you will now see "Admin Power Pack" in the Browse menu
-
-## Option 2 - Roll your own
-
-The end result of this will be similar to the above, except that the git repo will be writable.
+## local install
 
 1. Create a New Project
-   - This is found under Develop => Manage LookML Projects, then select the New LookML Project button in top right corner
-   - Give your project a name such as "admin_power_pack"
+   - Add project with a name such as "admin_power_pack"
    - As the "Starting Point" select "Blank Project". You'll now have a new project with no files
-1. Create a project manifest based on this [example](manifest.lkml)
-   - Use the `url` parameter to point to the [GitHub Pages hosted version](https://davidtamaki.github.io/admin_power_pack/looker_admin_power_pack.js) of this extension. This version will be updated regularly
-   - Alternatively, use the `file` parameter to host the application javascript in the LookML repo and include the [javascript file](looker_admin_power_pack.js) in the LookML project
-1. Create a new model file in your project named "admin_power_pack.model"
+2. Create a project manifest based on this [example](manifest.lkml)
+   - Use the `file` parameter to host the application javascript in the LookML repo and include the [javascript file](looker_admin_power_pack.js) in the LookML project
+3. Create a new model file in your project named "admin_power_pack.model"
    - Provide a [connection](https://docs.looker.com/r/lookml/types/model/connection) value (see above notes on models and connections)
    - Make sure to [configure the model you created](https://docs.looker.com/r/develop/configure-model) so that it has access to the connection. Develop => Manage LookML Projects => Configure button next to the new model
-1. Configure git for the project and deploy to production
-   - You can use the "Create Bare Repository" option to create a repo that exists only on the Looker server. This is usually sufficient unless you have a critical need to store the code elsewhere
-   - In that case, create a new repository on GitHub or a similar service, and follow the instructions to [connect your project to git](https://docs.looker.com/data-modeling/getting-started/setting-up-git-connection)
+4. Configure git for the project and deploy to production
+   - You can use the "Create Bare Repository" (server only) or create a new repository on GitHub 
    - [Commit your changes](https://docs.looker.com/r/develop/commit-changes) and [deploy them to production](https://docs.looker.com/r/develop/deploy-changes) through the Projects page UI
    - Once deployed, you will now see "Admin Power Pack" in the Browse menu
